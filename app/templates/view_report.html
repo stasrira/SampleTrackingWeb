@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tracking Report Viewer</title>
+</head>
+<body>
+
+    <div id = "div_select_report">
+        <label for="select_report">Report</label>
+        <select id = "select_report" >
+            {% for rep in reports %}
+                <option value = "{{  rep['rep_id'] }}">{{ rep['rep_name'] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id = "filters" style = "display: none;"><!--style="visibility: hidden"-->
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="/static/js/view_report.js"></script>
+
+</body>
+</html>

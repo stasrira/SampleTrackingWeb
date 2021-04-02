@@ -3,15 +3,24 @@ DB:
     # New prod conn string: Driver={ODBC Driver 17 for SQL Server};Server=10.9.10.59\SQLVP201606;Database=dw_motrpac;UID={!db_user_name!};PWD={!db_user_pwd!};
     # Local conn string: Driver={ODBC Driver 17 for SQL Server};Server=localhost\sqlexpress;Database=dw_motrpac;UID={!db_user_name!};PWD={!db_user_pwd!}
     # DB connection string
-    mdb_conn_str: Driver={ODBC Driver 17 for SQL Server};Server={!server!}};Database={!db_name!}};UID={!db_user_name!};PWD={!db_user_pwd!};
-    db_plh_sesrver: "{!server!}"
+    mdb_conn_str: Driver={ODBC Driver 17 for SQL Server};Server={!server!};Database={!db_name!};UID={!db_user_name!};PWD={!db_user_pwd!};
+    db_plh_server: "{!server!}"
     db_plh_db_name: "{!db_name!}"
     db_plh_user_name: "{!db_user_name!}"
-    db_plh_pwd: "{!db_user_pwd!}"
+    db_plh_user_pwd: "{!db_user_pwd!}"
     env_db_server: ST_DB_SERVER
     env_db_name: ST_DB_NAME
     env_db_user_name: ST_DB_USER_NAME
     env_db_user_pwd: ST_DB_USER_PWD
+
+    # stored procedures for running transaction reports
+    sp_rpt_lstsbycateg: exec usp_tr_get_latest_status_groupedby_categories @program_id = 2, @study_ids = '13', @pivot_by_field = 'operational_status'
+    sp_rpt_lstsbyactgrp: exec usp_tr_get_latest_status_per_action_group @program_id = 2, @study_ids = '13', @pivot_by_field = 'action_group'
+
+    # sql callst to get contents for report filters
+    sql_get_programs: Select * from vw_programs_simple order by program_name
+    sql_get_studies: Select * from vw_studies_simple order by study_Name
+
     # name of the stored proc to be used to load samples to DB
     mdb_sql_proc_load_sample: exec usp_load_single_sample @study_id = {study_id}, @sample_id ='{sample_id}', @json ='{smpl_json}', @dict_json='{dict_json}', @dict_path='{dict_path}', @data_source='{data_source}', @dict_update={dict_update}, @samlpe_update={samlpe_update}
 
@@ -67,3 +76,25 @@ Validate:
             - ST_DB_USER_NAME
             - ST_DB_USER_PWD
             - ST_SMTP_SERVER
+Reports:
+    Tracking:
+        -
+            rep_name: Latest Status By Category
+            rep_id: lstsbycateg
+            filters:
+                - program_id
+                - study_id
+                - aliquot_ids
+                - date_from
+                - date_to
+                - pivot_by
+        -
+            rep_name: Latest Status By Action Group
+            rep_id: lstsbyactgrp
+            filters:
+                - program_id
+                - study_id
+                - aliquot_ids
+                - date_from
+                - date_to
+                - pivot_by

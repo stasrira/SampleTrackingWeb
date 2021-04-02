@@ -1,4 +1,4 @@
-import os
+import os, inspect
 from pathlib import Path
 import traceback
 from utils import global_const as gc
@@ -9,20 +9,24 @@ from utils import common as cm
 from utils import send_email as email
 
 
+"""
+# not in use
 def getConfigAndLogRefs (log_file_name):
     mcfg = get_main_config()
     mlog, mlog_handler = get_logger(log_file_name)
     return mcfg, mlog, mlog_handler
+"""
 
 # get main config reference
 def get_main_config():
-    m_cfg = ConfigData(gc.MAIN_CONFIG_FILE)
-    return m_cfg
+    if not gc.main_cfg:
+        gc.main_cfg = ConfigData(gc.MAIN_CONFIG_FILE)
+    return gc.main_cfg
 
 # setup logger for the current web request
 def get_logger(process_log_id = None):
     if not process_log_id:
-        process_log_id = 'web_request'
+        process_log_id = inspect.stack()[1][3]
     # load main config file and get required values
     m_cfg = get_main_config() #ConfigData(gc.MAIN_CONFIG_FILE)
 
@@ -35,6 +39,16 @@ def get_logger(process_log_id = None):
 # stop logger
 def stop_logger(logger, handler):
     cm.stop_logger(logger, handler)
+
+def check_env_variables(call_from_file, log_ref):
+    if not gc.env_validated:
+        # current function: inspect.stack()[0][3], current caller: inspect.stack()[1][3]
+        caller = inspect.stack()[1][3]  # current function name
+        # cur_file = os.path.realpath(call_from_file)  # current file name
+        # validate expected environment variables; if some variable are not present, abort execution
+        gc.env_validated = validate_available_envir_variables(log_ref, gc.main_cfg, ['default'],
+                                                                 '{}=>{}'.format(call_from_file, caller))
+    return gc.env_validated
 
 # Validate expected Environment variables; if some variable are not present, abort execution
 # setup environment variable sources:
@@ -49,7 +63,8 @@ def validate_available_envir_variables (mlog, m_cfg, env_cfg_groups = None, proc
 
     app_path_to_report =Path(os.path.abspath(__file__)).parent.absolute()
 
-    mlog.info('Start validating presence of required environment variables.')
+    if mlog:
+        mlog.info('Start validating presence of required environment variables.')
     env_vars = []
     env_var_confs = m_cfg.get_value('Validate/environment_variables')  # get dictionary of envir variables lists
     if env_var_confs and isinstance(env_var_confs, dict):
@@ -67,11 +82,12 @@ def validate_available_envir_variables (mlog, m_cfg, env_cfg_groups = None, proc
             # check if any environment variables were recorded as missing
             _str = 'Process: {}. The following environment variables were not found: {}.'\
                 .format(process_name if process_name else 'Unknown', missing_env_vars)
-            mlog.error(_str)
+            if mlog:
+                mlog.error(_str)
             #return False
             # TODO: decide if sending email is needed
             # send notification email alerting about the error case
-            email_subject = 'SampleTracking Web - error occured!'
+            email_subject = 'SampleTracking Web - error occurred!'
             email_body = _str
             try:
                 email.send_yagmail(
@@ -84,10 +100,12 @@ def validate_available_envir_variables (mlog, m_cfg, env_cfg_groups = None, proc
                 # report unexpected error during sending emails to a log file and continue
                 _str = 'Unexpected Error "{}" occurred during an attempt to send an email.\n{}'.\
                     format(ex, traceback.format_exc())
-                mlog.critical(_str)
+                if mlog:
+                    mlog.critical(_str)
 
             return False
         else:
-            mlog.info('Process: {}. All required environment variables were found.'
+            if mlog:
+                mlog.info('Process: {}. All required environment variables were found.'
                       .format(process_name if process_name else 'Unknown'))
             return True

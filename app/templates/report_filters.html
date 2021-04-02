@@ -1,0 +1,28 @@
+{% for filter in filters %}
+    <label for="{{ filter }}">{{ filter }}</label>
+    {% if filters[filter] and 'result' in filters[filter] %}
+        <select id = "{{ filter }}" >
+            {% if filter != 'program_id' %}
+                <option value="" disabled selected hidden>Please Choose...</option>
+            {% endif %}
+            {% for item in filters[filter]['result'] %}
+                {% if filter == 'program_id' %}
+                    <option value = "{{  item['program_id'] }}"
+                    {% if item['program_id'] == cur_program_id %}
+                        selected
+                    {% endif %}
+                    >{{ item['program_Name'] }}</option>
+                {% endif %}
+                {% if filter == 'study_id' %}
+                    <option value = "{{  item['study_id'] }}" program_id = "{{ item['program_id'] }}">{{ item['study_Name'] }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    {% else %}
+        {% if 'date' in filter %}
+            <input type = "date" id = "{{ filter }}">
+        {% else %}
+            <input type = "text" id = "{{ filter }}">
+        {% endif %}
+    {% endif %}
+{% endfor %}

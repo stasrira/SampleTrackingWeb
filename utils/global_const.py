@@ -1,3 +1,7 @@
+# main global references
+main_cfg = None
+env_validated = False
+
 # ========== config file names
 # main config file name
 CONFIGS_DIR = 'configs/'
