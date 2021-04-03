@@ -18,8 +18,8 @@ DB:
     sp_rpt_lstsbyactgrp: exec usp_tr_get_latest_status_per_action_group @program_id = 2, @study_ids = '13', @pivot_by_field = 'action_group'
 
     # sql callst to get contents for report filters
-    sql_get_programs: Select * from vw_programs_simple order by program_name
-    sql_get_studies: Select * from vw_studies_simple order by study_Name
+    sql_get_programs: Select * from vw_programs_for_filters order by option_name
+    sql_get_studies: Select * from vw_studies_for_filters order by option_name
 
     # name of the stored proc to be used to load samples to DB
     mdb_sql_proc_load_sample: exec usp_load_single_sample @study_id = {study_id}, @sample_id ='{sample_id}', @json ='{smpl_json}', @dict_json='{dict_json}', @dict_path='{dict_path}', @data_source='{data_source}', @dict_update={dict_update}, @samlpe_update={samlpe_update}
@@ -79,22 +79,43 @@ Validate:
 Reports:
     Tracking:
         -
-            rep_name: Latest Status By Category
+            rep_name: Latest Status Grouped By Category
             rep_id: lstsbycateg
+            sql: exec usp_tr_get_latest_status_groupedby_categories @program_id = {program_id}, @study_ids = '{study_id}', @aliquot_ids = '{aliquot_ids}', @date_from = '{date_from}', @date_to = '{date_to}', @pivot_by_field = '{pivot_by}'
             filters:
-                - program_id
-                - study_id
-                - aliquot_ids
-                - date_from
-                - date_to
-                - pivot_by
+                - {id: program_id, name: Program Name, type: dropdown}
+                - {id: study_id, name: Study Name, type: multiselect}
+                - {id: aliquot_ids, name: Aliquot IDs, type: text}
+                - {id: date_from, name: Date From, type: date}
+                - {id: date_to, name: Date To, type: date}
+                -
+                    id: pivot_by
+                    name: Pivot By
+                    type: dropdown
+                    options:
+                        - {id: Exposure, name: Exposure}
+                        - {id: Center, name: Center}
+                        - {id: SpecimenPrep, name: Specimen Prep}
+                        - {id: assay_name, name: Assay Name}
+                        - {id: operational_status, name: Operational Status}
         -
-            rep_name: Latest Status By Action Group
+            rep_name: Latest Status Grouped By Action Group
             rep_id: lstsbyactgrp
+            sql: exec usp_tr_get_latest_status_per_action_group @program_id = {program_id}, @study_ids = '{study_id}', @aliquot_ids = '{aliquot_ids}', @date_from = '{date_from}', @date_to = '{date_to}', @pivot_by_field = '{pivot_by}'
             filters:
-                - program_id
-                - study_id
-                - aliquot_ids
-                - date_from
-                - date_to
-                - pivot_by
+                - { id: program_id, name: Program Name, type: dropdown }
+                - { id: study_id, name: Study Name, type: multiselect }
+                - { id: aliquot_ids, name: Aliquot IDs, type: text }
+                - { id: date_from, name: Date From, type: date }
+                - { id: date_to, name: Date To, type: date }
+                -
+                    id: pivot_by
+                    name: Pivot By
+                    type: dropdown
+                    options:
+                        - { id: Exposure, name: Exposure }
+                        - { id: Center, name: Center }
+                        - { id: SpecimenPrep, name: Specimen Prep }
+                        - { id: assay_name, name: Assay Name }
+                        - { id: operational_status, name: Operational Status }
+

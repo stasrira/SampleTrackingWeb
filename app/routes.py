@@ -49,7 +49,7 @@ def get_report_filters():
     # str = ''
     filters_out = {}
     if request.method == 'POST':
-        print(request.form['report_id']) #request.form['program_id'])
+        # print(request.form['report_id']) #request.form['program_id'])
         reports = mcfg.get_value(cfg_rep_loc)
         for rep in reports:
             if rep['rep_id'] == request.form['report_id']:
@@ -57,33 +57,109 @@ def get_report_filters():
                     filters = rep['filters']
                     for filter in filters:
                         data = get_filter_values(filter)
-                        if 'result' in data and data['result']:
-                             filters_out[filter] = data
-                        else:
-                            filters_out[filter] = None
-    cur_program_id =  int((request.form['cur_program_id']) if request.form['cur_program_id'].isnumeric() else -1)
+                        if 'result' in data and 'id' in data:
+                            filters_out[data['id']] = data
+                            # if data['result']:
+                            #      filters_out[data['id']] = data
+                            # else:
+                            #     filters_out[data['id']] = None
+    cur_program_id = int((request.form['cur_program_id']) if request.form['cur_program_id'].isnumeric() else -1)
     return render_template('report_filters.html', filters=filters_out, cur_program_id = cur_program_id)
 
-def get_filter_values(filter_id):
+def get_filter_values(filter):
     mcfg = cm2.get_main_config()
     mlog, mlog_handler = cm2.get_logger()
     result = None
     columns = None
     err = None
     filter_data = {}
+    filter_id_str = 'unknown'
+    filter_name_str = 'unknown'
+    filter_data_type = 'text'
 
-    if filter_id == 'program_id':
-        result, columns, err = rp.get_filter_data(mcfg, mlog, filter_id)
-    if filter_id == 'study_id':
-        result, columns, err = rp.get_filter_data(mcfg, mlog, filter_id)
+    # if isinstance(filter, str):
+    #     filter_id_str = filter
 
-    if result:
-        if not err.exist():
-            filter_data['id'] = filter_id
+    if filter and isinstance(filter, dict):
+        if 'id' in filter:
+            filter_id_str = filter['id']
+        if 'name' in filter:
+            filter_name_str = filter['name']
+        if 'type' in filter:
+            filter_data_type = filter['type']
+        if 'id' in filter and filter['id'] == 'program_id':
+            result, columns, err = rp.get_filter_data(mcfg, mlog, filter['id'])
+        if 'id' in filter and filter['id'] == 'study_id':
+            result, columns, err = rp.get_filter_data(mcfg, mlog, filter['id'])
+        # if filter and isinstance(filter, dict):
+        # if 'name' in filter:
+        #     filter_id_str = filter['name']
+
+        # if result is not populated yet and options are present in the config
+        if not result and 'options' in filter:
+            result = []
+            for opt in filter['options']:
+                result.append({'option_id': opt['id'], 'option_name': opt['name']})
+        #if result:
+        if not err or not err.exist():
+            filter_data['id'] = filter_id_str
+            filter_data['name'] = filter_name_str
             filter_data['result'] = result
-            filter_data['columns'] = columns
+            filter_data['type'] = filter_data_type
+            # filter_data['columns'] = columns
 
     return filter_data
+
+@app.route('/get_report_data', methods=['POST'])
+def get_report_data():
+    cfg_rep_loc = 'Reports/Tracking'
+    mcfg = cm2.get_main_config()
+    mlog, mlog_handler = cm2.get_logger()
+    process_name = inspect.stack()[0][3]
+    err = WebError(process_name)
+    sql = ''
+    report_name = ''
+    report_id = ''
+    report_request = {}
+    parameters = {}
+
+    if request.method == 'POST':
+        # print(request.form['report_id']) #request.form['program_id'])
+        reports = mcfg.get_value(cfg_rep_loc)
+        for rep in reports:
+            if rep['rep_id'] == request.form['report_id']:
+                report_name = rep['rep_name']
+                report_id = rep['rep_id']
+                # get sql statement
+                if 'sql' in rep:
+                    sql = rep['sql']
+
+                # collect expected parameters and update sql statement
+                if 'filters' in rep:
+                    for flt in rep['filters']:
+                        if 'id' in flt:
+                            if flt['id'] in request.form:
+                                param_val = request.form[flt['id']]
+                            else:
+                                param_val = ''
+                            sql = sql.replace('{' + flt['id'] + '}', param_val)
+                break
+
+        # run report against DB
+        mdb = MetadataDB()
+        result, columns = mdb.run_sql_request(mlog, err, process_name, sql)
+
+        if not err.exist():
+            mlog.info('Retruning data for requested report id "{}".'.format(report_id))
+            cm2.stop_logger(mlog, mlog_handler)
+            return render_template('report_data.html', report_name=report_name, columns=columns, data=result)
+        else:
+            str = 'Some errors were generated during retrieving data for "{}" report.'.format(report_name)
+            mlog.info('Proceeding to report the following error to the web page: '.format(str))
+            cm2.stop_logger(mlog, mlog_handler)
+            return render_template('error.html', report_name=report_name, error = str)
+
+
 
 
 @app.route('/reports/lstsbycateg')

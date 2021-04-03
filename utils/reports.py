@@ -2,7 +2,7 @@ import traceback, inspect
 from errors import WebError
 from utils import common2 as cm2, MetadataDB
 
-def report_tr_lstsbycateg(mcfg, mlog):
+def report_tr_lstsbycateg(mcfg, mlog, parameters = None):
     result = None
     columns = None
     report_name = 'Latest Status Grouped By Categories'

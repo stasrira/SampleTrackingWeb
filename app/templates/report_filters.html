@@ -1,28 +1,51 @@
 {% for filter in filters %}
-    <label for="{{ filter }}">{{ filter }}</label>
-    {% if filters[filter] and 'result' in filters[filter] %}
-        <select id = "{{ filter }}" >
-            {% if filter != 'program_id' %}
-                <option value="" disabled selected hidden>Please Choose...</option>
+    <div>
+    {% if filter != 'program_id' %}
+        <label for="{{ filter }}">{{ filters[filter]['name'] }}</label>
+    {% endif %}
+    {% if filters[filter] and 'result' in filters[filter] and  filters[filter]['result'] %}
+
+        {% if filter == 'program_id' %}
+            <div class="form-floating">
+        {% endif %}
+        <select id = "{{ filter }}" style="width:100%" class="form-select"
+        {% if filter == 'study_id' %}
+            multiple="multiple"
+        {% endif %}
+        >
+            {% if filter != 'program_id' and filter != 'study_id'%}
+                <option value="" selected>Keep blank or choose...</option>
             {% endif %}
             {% for item in filters[filter]['result'] %}
                 {% if filter == 'program_id' %}
-                    <option value = "{{  item['program_id'] }}"
-                    {% if item['program_id'] == cur_program_id %}
+                    <option value = "{{  item['option_id'] }}"
+                    {% if item['option_id'] == cur_program_id %}
                         selected
                     {% endif %}
-                    >{{ item['program_Name'] }}</option>
-                {% endif %}
-                {% if filter == 'study_id' %}
-                    <option value = "{{  item['study_id'] }}" program_id = "{{ item['program_id'] }}">{{ item['study_Name'] }}</option>
+                    >{{ item['option_name'] }}</option>
+                {% elif filter == 'study_id' %}
+                    <option value = "{{  item['option_id'] }}" program_id = "{{ item['parent_id'] }}">{{ item['option_name'] }}</option>
+                {% else %}
+                    <option value = "{{  item['option_id'] }}">{{ item['option_name'] }}</option>
                 {% endif %}
             {% endfor %}
         </select>
-    {% else %}
-        {% if 'date' in filter %}
-            <input type = "date" id = "{{ filter }}">
-        {% else %}
-            <input type = "text" id = "{{ filter }}">
+        {% if filter == 'program_id' %}
+            <label for="{{ filter }}">{{ filters[filter]['name'] }}</label>
+            </div>
         {% endif %}
+    {% else %}
+{#        <input type =#}
+        {% if 'type' in filters[filter] %}
+            {% if filters[filter]['type'] == 'date' %}
+                <input type = "{{ filters[filter]['type'] }}" id = "{{ filter }}" data-clear-btn="true">
+           {% else %}
+               <input type = "{{ filters[filter]['type'] }}" id = "{{ filter }}">
+           {% endif %}
+        {% else %}
+            <input type ="text" id = "{{ filter }}">
+        {% endif %}
+{#        id = "{{ filter }}">#}
     {% endif %}
+    </div>
 {% endfor %}
