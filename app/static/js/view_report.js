@@ -17,13 +17,41 @@ $(document).ready(function() {
 
                 $('#filters').show();
                 on_program_change(); //register program id control event
-                on_filter_change(); //register filter change event
+                // on_filter_change(); //register filter change event
+                on_run_report(); //register Run Report button click
 
                 $('#study_id').multiselect({
                     buttonWidth: '100%',
+                    maxHeight: 250,
                     includeResetOption: true,
+                    includeResetDivider: true,
+                    numberDisplayed: 2,
                     resetText: "Clear all selected options",
+                    enableFiltering: true,
+                    enableCaseInsensitiveFiltering: true,
+                    includeFilterClearBtn: true,
+                    // includeSelectAllOption: true,
+                    nonSelectedText: 'Please Choose... ',
+                    selectedClass: 'active multiselect-selected'
+                    // onDeselectAll: function() {
+                    //     alert('onDeselectAll triggered!');
+                    // },
+                    // onChange: function(element, checked) {
+                    //     if (checked === true) {
+                    //         console.debug('checked => ' + element.value);
+                    //     } else if (checked === false) {
+                    //         console.debug('un-checked => ' + element.value);
+                    //     }
+                    // }
                 });
+
+                $("#study_id + div").css("height","100%");
+
+                 // initilalite datepicker plugin
+                init_datepicker();
+                // });
+
+                //hides/shows studies based on the selected program id
                 validate_studies($('#program_id').val()); //run this function for first time on loading
 
                 //check if previously selected study_id can be selected again
@@ -38,25 +66,111 @@ $(document).ready(function() {
         });
     });
 
-    //declare onChange event for program_id control
+    var init_datepicker = function (){
+          // if desktop device, use DateTimePicker
+          $("[datepicker]").datetimepicker({
+            useCurrent: false,
+            format: "L",
+            showTodayButton: true,
+            icons: {
+              next: "fa fa-chevron-right",
+              previous: "fa fa-chevron-left",
+              today: "todayText"
+            }
+          });
+          // $("#timepicker").datetimepicker({
+          //   format: "LT",
+          //   icons: {
+          //     up: "fa fa-chevron-up",
+          //     down: "fa fa-chevron-down"
+          //   }
+          // });
+    }
+
+    //declare onChange event for any filter change
     var on_filter_change = function() {
         $("#filters :input").on('change', function () {
             //$("#program_id").on('change', function () {
-            var loading = '<div style="width=100%; height: 100px; background-color: red; horiz-align: left; color: darkgray"><h2>Loading...</h2></div>';
-            $('#div_report').html(loading);
+            $('#div_report').hide();
+            $('#loader').show();
             //$('#div_report').hide();
-            // alert('test');
+            //alert($('#study_id option:selected')); //$('#study_id')
+            var sel_studies_arr = [];
+            var sel_studies = '';
+            var i;
+
+            // $('#study_id option:selected').each(function() {
+            //     sel_studies = sel_studies + (',' + this.value ? sel_studies : this.value)
+            // })
+
+            if ($('#study_id option:selected')) {
+                for (i = 0; i < $('#study_id option:selected').length; i++) {
+                    sel_studies_arr[i] = $('#study_id option:selected')[i].value;
+                }
+                sel_studies = sel_studies_arr.join();
+            }
+            console.log('Selected studies-> ' + sel_studies);
+
             $.post("/get_report_data",
                 {
                     report_id: $('#select_report').val() ? $('#select_report').val() : "",
                     program_id: $('#program_id').val() ? $('#program_id').val() : "",
-                    study_id: $('#study_id').val() ? $('#study_id').val() : "",
+                    //study_id: $('#study_id').val() ? $('#study_id').val() : "",
+                    study_id: sel_studies,
                     aliquot_ids: $('#aliquot_ids').val() ? $('#aliquot_ids').val() : "",
                     date_from: $('#date_from').val() ? $('#date_from').val() : "",
                     date_to: $('#date_to').val() ? $('#date_to').val() : "",
                     pivot_by: $('#pivot_by').val() ? $('#pivot_by').val() : "",
                 },
                 function (data, status) {
+                    $('#loader').hide();
+                    $('#div_report').html(data);
+                    $('#div_report').show();
+                    var mytable = data_table();
+                    mytable.buttons()
+                        .container()
+                        .appendTo( '#report_wrapper .col-md-6:eq(0)' );
+                });
+        });
+    }
+
+    //declare onChange event for any filter change
+    var on_run_report = function() {
+        $("#run_report").click(function () {
+            //$("#program_id").on('change', function () {
+            $('#div_report').hide();
+            $('#loader').show();
+            //$('#div_report').hide();
+            //alert($('#study_id option:selected')); //$('#study_id')
+            var sel_studies_arr = [];
+            var sel_studies = '';
+            var i;
+
+            // $('#study_id option:selected').each(function() {
+            //     sel_studies = sel_studies + (',' + this.value ? sel_studies : this.value)
+            // })
+
+            if ($('#study_id option:selected')) {
+                for (i = 0; i < $('#study_id option:selected').length; i++) {
+                    sel_studies_arr[i] = $('#study_id option:selected')[i].value;
+                }
+                sel_studies = sel_studies_arr.join();
+            }
+            console.log('Selected studies-> ' + sel_studies);
+
+            $.post("/get_report_data",
+                {
+                    report_id: $('#select_report').val() ? $('#select_report').val() : "",
+                    program_id: $('#program_id').val() ? $('#program_id').val() : "",
+                    //study_id: $('#study_id').val() ? $('#study_id').val() : "",
+                    study_id: sel_studies,
+                    aliquot_ids: $('#aliquot_ids').val() ? $('#aliquot_ids').val() : "",
+                    date_from: $('#date_from').val() ? $('#date_from').val() : "",
+                    date_to: $('#date_to').val() ? $('#date_to').val() : "",
+                    pivot_by: $('#pivot_by').val() ? $('#pivot_by').val() : "",
+                },
+                function (data, status) {
+                    $('#loader').hide();
                     $('#div_report').html(data);
                     $('#div_report').show();
                     var mytable = data_table();

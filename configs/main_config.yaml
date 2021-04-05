@@ -83,11 +83,8 @@ Reports:
             rep_id: lstsbycateg
             sql: exec usp_tr_get_latest_status_groupedby_categories @program_id = {program_id}, @study_ids = '{study_id}', @aliquot_ids = '{aliquot_ids}', @date_from = '{date_from}', @date_to = '{date_to}', @pivot_by_field = '{pivot_by}'
             filters:
-                - {id: program_id, name: Program Name, type: dropdown}
-                - {id: study_id, name: Study Name, type: multiselect}
-                - {id: aliquot_ids, name: Aliquot IDs, type: text}
-                - {id: date_from, name: Date From, type: date}
-                - {id: date_to, name: Date To, type: date}
+                - {id: program_id, name: Program, type: dropdown}
+                - {id: study_id, name: Studies, type: multiselect}
                 -
                     id: pivot_by
                     name: Pivot By
@@ -98,16 +95,16 @@ Reports:
                         - {id: SpecimenPrep, name: Specimen Prep}
                         - {id: assay_name, name: Assay Name}
                         - {id: operational_status, name: Operational Status}
+                - { id: date_from, name: Date From, type: date }
+                - { id: date_to, name: Date To, type: date }
+                - { id: aliquot_ids, name: Aliquot Ids, type: textarea }
         -
             rep_name: Latest Status Grouped By Action Group
             rep_id: lstsbyactgrp
             sql: exec usp_tr_get_latest_status_per_action_group @program_id = {program_id}, @study_ids = '{study_id}', @aliquot_ids = '{aliquot_ids}', @date_from = '{date_from}', @date_to = '{date_to}', @pivot_by_field = '{pivot_by}'
             filters:
-                - { id: program_id, name: Program Name, type: dropdown }
-                - { id: study_id, name: Study Name, type: multiselect }
-                - { id: aliquot_ids, name: Aliquot IDs, type: text }
-                - { id: date_from, name: Date From, type: date }
-                - { id: date_to, name: Date To, type: date }
+                - { id: program_id, name: Program, type: dropdown }
+                - { id: study_id, name: Studies, type: multiselect }
                 -
                     id: pivot_by
                     name: Pivot By
@@ -116,6 +113,10 @@ Reports:
                         - { id: Exposure, name: Exposure }
                         - { id: Center, name: Center }
                         - { id: SpecimenPrep, name: Specimen Prep }
-                        - { id: assay_name, name: Assay Name }
-                        - { id: operational_status, name: Operational Status }
-
+                        - { id: action_group, name: Action Group }
+                        - { id: action_name, name: Action Name }
+                        - { id: action_name_alias, name: Action Alias }
+                        - { id: trans_owner, name: Process Owner }
+                - { id: date_from, name: Date From, type: date }
+                - { id: date_to, name: Date To, type: date }
+                - { id: aliquot_ids, name: Aliquot Ids, type: textarea }

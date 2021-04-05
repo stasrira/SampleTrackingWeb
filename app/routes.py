@@ -159,7 +159,9 @@ def get_report_data():
             cm2.stop_logger(mlog, mlog_handler)
             return render_template('error.html', report_name=report_name, error = str)
 
-
+@app.route('/test/loader')
+def test_loader():
+    return render_template('test_loader.html')
 
 
 @app.route('/reports/lstsbycateg')
