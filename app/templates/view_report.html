@@ -32,21 +32,35 @@
     <div class="container-fluid">
         <div class="row">
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-                <div class="position-sticky pt-3">
+{#                <div class="position-sticky pt-3">#}
+{##}
+{#                    <div id = "div_select_report" class="form-floating">#}
+{##}
+{#                        <select id = "select_report" class="form-select">#}
+{#                            <option value="" disabled selected hidden>Please Choose...</option>#}
+{#                            {% for rep in reports %}#}
+{#                                <option value = "{{  rep['rep_id'] }}">{{ rep['rep_name'] }}</option>#}
+{#                            {% endfor %}#}
+{#                        </select>#}
+{#                        <label for="select_report">Report</label>#}
+{#                    </div>#}
+{##}
+{#                    <div id = "filters" style = "display: none;"></div>#}
+{##}
+{#                </div>#}
 
-                    <div id = "div_select_report" class="form-floating">
-
-                        <select id = "select_report" class="form-select">
+                <div>
+                    <div class="input-group mb-1">
+                      <span class="input-group-text" id="basic-addon1" style="width: 100px">Report</span>
+                      <select id = "select_report" class="form-control" style="appearance: auto;">
                             <option value="" disabled selected hidden>Please Choose...</option>
                             {% for rep in reports %}
                                 <option value = "{{  rep['rep_id'] }}">{{ rep['rep_name'] }}</option>
                             {% endfor %}
-                        </select>
-                        <label for="select_report">Report</label>
+                      </select>
                     </div>
 
                     <div id = "filters" style = "display: none;"></div>
-
                 </div>
             </nav>
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="overflow-y: auto;">

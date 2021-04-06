@@ -1,6 +1,7 @@
 $(document).ready(function() {
 
     $('#select_report').on('change', function () {
+
         $.post("/get_report_filters",
         {
             report_id: this.value,
@@ -16,6 +17,7 @@ $(document).ready(function() {
                 $('#filters').html(data);
 
                 $('#filters').show();
+
                 on_program_change(); //register program id control event
                 // on_filter_change(); //register filter change event
                 on_run_report(); //register Run Report button click
@@ -27,25 +29,27 @@ $(document).ready(function() {
                     includeResetDivider: true,
                     numberDisplayed: 2,
                     resetText: "Clear all selected options",
-                    enableFiltering: true,
-                    enableCaseInsensitiveFiltering: true,
-                    includeFilterClearBtn: true,
+                    // enableFiltering: true,
+                    // enableCaseInsensitiveFiltering: true,
+                    // includeFilterClearBtn: true,
                     // includeSelectAllOption: true,
                     nonSelectedText: 'Please Choose... ',
                     selectedClass: 'active multiselect-selected'
                     // onDeselectAll: function() {
                     //     alert('onDeselectAll triggered!');
                     // },
-                    // onChange: function(element, checked) {
-                    //     if (checked === true) {
-                    //         console.debug('checked => ' + element.value);
-                    //     } else if (checked === false) {
-                    //         console.debug('un-checked => ' + element.value);
-                    //     }
-                    // }
+                    ,onChange: function(element, checked) {
+                        console.log($(".multiselect-container > button.disabled"));
+                        console.log();
+                        $(".multiselect-container > button.disabled").hide();
+                    }
                 });
 
+                //adjust height of the multiselect button after it was rendered
                 $("#study_id + div").css("height","100%");
+
+                // //search box event registration
+                // search_box_event ();
 
                  // initilalite datepicker plugin
                 init_datepicker();
@@ -65,6 +69,12 @@ $(document).ready(function() {
           }
         });
     });
+
+    // var search_box_event = function (){
+    //     $(".multiselect-container > div > input").keyup(function(){
+    //         console.log('keyup');
+    //     });
+    // }
 
     var init_datepicker = function (){
           // if desktop device, use DateTimePicker
