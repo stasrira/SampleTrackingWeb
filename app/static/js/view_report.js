@@ -1,6 +1,16 @@
 $(document).ready(function() {
 
+    //select_report onChange event
     $('#select_report').on('change', function () {
+
+        //assign current value to the tool tip
+        assign_selected_option_to_tooltip ($('#select_report'), $('#select_report :selected'));
+
+        //console.log($('#select_report :selected').attr('helptip'));
+        enable_popover(
+            $('#select_report :selected').attr('helptip').split("|")[0],
+            $('#select_report :selected').attr('helptip').split("|")[1]
+        );
 
         $.post("/get_report_filters",
         {
@@ -33,7 +43,7 @@ $(document).ready(function() {
                     // enableCaseInsensitiveFiltering: true,
                     // includeFilterClearBtn: true,
                     // includeSelectAllOption: true,
-                    nonSelectedText: 'Please Choose... ',
+                    nonSelectedText: 'Keep blank or Choose... ',
                     selectedClass: 'active multiselect-selected'
                     // onDeselectAll: function() {
                     //     alert('onDeselectAll triggered!');
@@ -47,6 +57,14 @@ $(document).ready(function() {
 
                 //adjust height of the multiselect button after it was rendered
                 $("#study_id + div").css("height","100%");
+
+                //run assignment of the tooltip for pivot_by dropdown on the initial load of the filter
+                assign_selected_option_to_tooltip ($('#pivot_by'), $('#pivot_by :selected'));
+
+                //assign onChaneg event to pivot_by dropdown
+                $('#pivot_by').on('change', function () {
+                    assign_selected_option_to_tooltip ($('#pivot_by'), $('#pivot_by :selected'));
+                });
 
                 // //search box event registration
                 // search_box_event ();
@@ -119,7 +137,7 @@ $(document).ready(function() {
                 }
                 sel_studies = sel_studies_arr.join();
             }
-            console.log('Selected studies-> ' + sel_studies);
+            //console.log('Selected studies-> ' + sel_studies);
 
             $.post("/get_report_data",
                 {
@@ -234,4 +252,81 @@ $(document).ready(function() {
             }
         });
     }
+
+    //assign current value of the dropdown to the tool tip
+    var assign_selected_option_to_tooltip = function(control, selected_option){
+        control.prop('title', selected_option.text());
+    }
+
+    //run assignment of the tooltip for select_report on the initial load
+    assign_selected_option_to_tooltip ($('#select_report'), $('#select_report :selected'));
+
+    // $(function () {
+    //   $('[data-toggle="popover"]').popover();
+    // })
+
+    // $(function () {
+    //   $('#report_popover').popover({
+    //     container: 'body'
+    //   })
+    // })
+
+    //popover enabling function
+    var enable_popover = function(title, content) {
+        //$('#report_popover').popover('dispose');
+        $('#report_popover').popover('show')
+            .popover('dispose')
+            .popover({
+                container: ' body',
+                // trigger: 'hover',
+                trigger: 'focus',
+                //html: true,
+                placement: 'right',
+                title: title, //'Select Report',
+                content: content //'Select a report from the list. Once one is selected, this help window will display additional info about the selected report.',
+            })//.popover("show");
+
+        /*
+         * The following two handlers provide the functionality of a "click" trigger
+         * Once the popover is fully shown we bind an event listener to the button click
+         * on button click the focus is blured thus closing the popover.
+         * On hiding the popover we unbind the event listener from the button
+         */
+        $('#report_popover').on('shown.bs.popover', function(){
+            $('#report_popover').on('click', function() {
+                console.log('click');
+                $('#report_popover').blur();
+                // if ($('#select_report :selected').attr('helptip')) {
+                //     console.log('helptip');
+                //     enable_popover(
+                //         $('#select_report :selected').attr('helptip').split("|")[0],
+                //         $('#select_report :selected').attr('helptip').split("|")[1]
+                //     );
+                // }
+                // else {
+                //     console.log('initial');
+                //     enable_popover('Select Report',
+                // 'Select a report from the list. Once one is selected, this help window will display additional info about the selected report.');
+                // }
+            });
+        });
+
+        $('#report_popover').on('hide.bs.popover', function(){
+            $('#report_popover').off('click');
+        });
+
+        //close popover on the escape button click
+        $(document).keyup(function(e) {
+            if (e.key === "Escape") { // escape key maps to keycode `27`
+                console.log('escape');
+                $('#report_popover').blur();
+            }
+        });
+
+    }
+
+    //initiate popover
+    enable_popover('Select Report',
+        'Select a report from the list. Once one is selected, this help window will display additional info about the selected report.');
+
 } );

@@ -51,16 +51,40 @@
 
                 <div>
                     <div class="input-group mb-1">
-                      <span class="input-group-text" id="basic-addon1" style="width: 100px">Report</span>
-                      <select id = "select_report" class="form-control" style="appearance: auto;">
+                        <span class="input-group-text" id="basic-addon1" style="width: 100px">Report</span>
+                        <select id = "select_report" class="form-control" style="appearance: auto;" >{# data-toggle="tooltip" data-placement="bottom" #}
                             <option value="" disabled selected hidden>Please Choose...</option>
                             {% for rep in reports %}
-                                <option value = "{{  rep['rep_id'] }}">{{ rep['rep_name'] }}</option>
+                                <option value = "{{  rep['rep_id'] }}" helptip="Title: {{ rep['rep_name'] }}| Help: {{ rep['rep_name'] }}">
+                                    {{ rep['rep_name'] }}
+                                </option>
                             {% endfor %}
-                      </select>
+                        </select>
+                        <a tabindex="0" class="btn" id="report_popover"
+{#                              data-toggle="popover" data-placement="right" data-trigger="focus"#}
+{#                              title="Test Popover !!!"#}
+{#                              data-content="Test Report Dropdown Popover - details here"#}
+                        >
+{#                            <i class="fas fa-question" style="color:blue"></i>#}
+                            <i class="far fa-question-circle" style="color:blue"></i>
+                        </a>
                     </div>
 
-                    <div id = "filters" style = "display: none;"></div>
+                    <div id = "filters" style = "display:block;">
+{#                        <span data-toggle="popover" data-placement="bottom" title="Test Popover" style="float:right">test</span>#}
+
+                        <div class="card border-secondary" >
+                          <div class="card-body">
+                            <h5 class="card-title">Select a Report
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16" style = "float:right">
+                                      <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z"/>
+                                    </svg>
+                                </h5>
+                            <p class="card-text">Please select a report from the dropbox above to proceed.</p>
+                          </div>
+                        </div>
+
+                    </div>
                 </div>
             </nav>
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="overflow-y: auto;">
